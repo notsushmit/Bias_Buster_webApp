@@ -2,6 +2,19 @@
 
 A comprehensive web application that analyzes news articles for bias, factuality, and provides comparative coverage from multiple sources with simulated social media sentiment analysis.
 
+Demo Link:https://monumental-monstera-01223e.netlify.app/
+
+# Screenshots
+![image](https://github.com/user-attachments/assets/e54a5fe1-9f9e-4a9c-b4b2-392aa9bac762)
+![image](https://github.com/user-attachments/assets/5eefae34-9f95-4711-b469-3184dbe652c3)
+![image](https://github.com/user-attachments/assets/659a27a7-8bc1-4136-99f8-bd4bda72a534)
+![image](https://github.com/user-attachments/assets/0fe17c63-e048-40c5-a077-fa69cd3ad9a2)
+
+
+
+
+
+
 ## Features
 
 - **Real-time Bias Detection**: Analyzes political bias, emotional language, and factuality
