@@ -7,6 +7,15 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   }
+  
+  /* Dark mode styles */
+  .dark {
+    color-scheme: dark;
+  }
+  
+  .light {
+    color-scheme: light;
+  }
 }
 
 @layer utilities {
@@ -34,25 +43,49 @@
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
+  
+  /* Theme transition */
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
+/* Custom scrollbar - Dark mode */
+.dark ::-webkit-scrollbar {
   width: 8px;
 }
 
-::-webkit-scrollbar-track {
+.dark ::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb {
+.dark ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
   border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+/* Custom scrollbar - Light mode */
+.light ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.light ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 /* Smooth transitions */
@@ -60,12 +93,20 @@
   transition: all 0.2s ease-in-out;
 }
 
-/* Focus styles */
-button:focus,
-input:focus,
-select:focus {
+/* Focus styles - Dark mode */
+.dark button:focus,
+.dark input:focus,
+.dark select:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Focus styles - Light mode */
+.light button:focus,
+.light input:focus,
+.light select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 /* Hover effects */
@@ -89,11 +130,18 @@ select:focus {
   animation: shimmer 1.5s infinite;
 }
 
-/* Glassmorphism effect */
-.glass {
+/* Glassmorphism effect - Dark mode */
+.dark .glass {
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Glassmorphism effect - Light mode */
+.light .glass {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Gradient text */
@@ -102,4 +150,15 @@ select:focus {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Theme-specific selection colors */
+.dark ::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+.light ::selection {
+  background: rgba(59, 130, 246, 0.2);
+  color: #1f2937;
 }

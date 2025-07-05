@@ -6,9 +6,10 @@ import { SourceDirectory } from './components/SourceDirectory';
 import { ApiKeySetup } from './components/ApiKeySetup';
 import { AuroraBackground } from './components/AuroraBackground';
 import { ClickSpark } from './components/ClickSpark';
-import { BiasProvider } from './context/BiasContext';
+import { BiasProvider, useBias } from './context/BiasContext';
 
-function App() {
+function AppContent() {
+  const { darkMode } = useBias();
   const [activeTab, setActiveTab] = useState<'analyzer' | 'dashboard' | 'sources' | 'settings'>('analyzer');
   const [sparks, setSparks] = useState<Array<{ id: string; x: number; y: number }>>([]);
 
@@ -26,25 +27,38 @@ function App() {
   };
 
   return (
-    <BiasProvider>
-      <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden" onClick={handleClick}>
-        <AuroraBackground />
+    <div 
+      className={`min-h-screen transition-colors duration-300 relative overflow-hidden ${
+        darkMode 
+          ? 'bg-gray-900 text-white' 
+          : 'bg-gray-50 text-gray-900'
+      }`} 
+      onClick={handleClick}
+    >
+      <AuroraBackground />
+      
+      {sparks.map(spark => (
+        <ClickSpark key={spark.id} x={spark.x} y={spark.y} />
+      ))}
+      
+      <div className="relative z-10">
+        <Header activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        {sparks.map(spark => (
-          <ClickSpark key={spark.id} x={spark.x} y={spark.y} />
-        ))}
-        
-        <div className="relative z-10">
-          <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-          
-          <main className="container mx-auto px-4 py-8">
-            {activeTab === 'settings' && <ApiKeySetup />}
-            {activeTab === 'analyzer' && <ArticleAnalyzer />}
-            {activeTab === 'dashboard' && <Dashboard />}
-            {activeTab === 'sources' && <SourceDirectory />}
-          </main>
-        </div>
+        <main className="container mx-auto px-4 py-8">
+          {activeTab === 'settings' && <ApiKeySetup />}
+          {activeTab === 'analyzer' && <ArticleAnalyzer />}
+          {activeTab === 'dashboard' && <Dashboard />}
+          {activeTab === 'sources' && <SourceDirectory />}
+        </main>
       </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <BiasProvider>
+      <AppContent />
     </BiasProvider>
   );
 }

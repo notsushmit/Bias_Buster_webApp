@@ -18,7 +18,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <header className="backdrop-blur-md bg-white/10 border-b border-white/20 sticky top-0 z-50">
+    <header className={`backdrop-blur-md border-b sticky top-0 z-50 transition-colors duration-300 ${
+      darkMode 
+        ? 'bg-white/10 border-white/20' 
+        : 'bg-black/10 border-black/20'
+    }`}>
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -39,10 +43,18 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white/20 ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    darkMode 
+                      ? 'hover:bg-white/20' 
+                      : 'hover:bg-black/10'
+                  } ${
                     activeTab === tab.id
-                      ? 'bg-white/20 text-white shadow-lg'
-                      : 'text-gray-300 hover:text-white'
+                      ? darkMode 
+                        ? 'bg-white/20 text-white shadow-lg' 
+                        : 'bg-black/10 text-gray-900 shadow-lg'
+                      : darkMode 
+                        ? 'text-gray-300 hover:text-white' 
+                        : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -54,7 +66,12 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
 
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            className={`p-2 rounded-lg transition-all duration-200 ${
+              darkMode 
+                ? 'bg-white/10 hover:bg-white/20 text-yellow-400' 
+                : 'bg-black/10 hover:bg-black/20 text-gray-700'
+            }`}
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
