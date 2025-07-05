@@ -6,7 +6,7 @@ A comprehensive web application that analyzes news articles for bias, factuality
 
 **[View Live Application](https://leafy-chimera-e2570b.netlify.app/)**
 
-## Demo Video
+## 📽 Demo Video
 https://drive.google.com/file/d/1pO6EhtGocrKJNdtNkgN2m9-Z2dh0F5hp/view
 
 ## 📸 Screenshots
