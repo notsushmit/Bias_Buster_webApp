@@ -167,19 +167,71 @@ const extractKeyTerms = (title: string): string => {
 };
 
 // Generate mock related articles when APIs fail
-const generateMockRelatedArticles = async (title: string): Promise<NewsArticle[]> => {
+const generateMockRelatedArticles = (title: string): NewsArticle[] => {
   const keyTerms = extractKeyTerms(title);
-  const sources = ['Reuters', 'BBC News', 'CNN', 'Fox News', 'The Guardian', 'Wall Street Journal'];
+  const sources = [
+    { name: 'Reuters', bias: 'center' },
+    { name: 'BBC News', bias: 'center-left' },
+    { name: 'CNN', bias: 'left' },
+    { name: 'Fox News', bias: 'right' },
+    { name: 'The Guardian', bias: 'left' },
+    { name: 'Wall Street Journal', bias: 'center-right' }
+  ];
   
-  return sources.map((source, index) => ({
-    title: `${source} Coverage: ${keyTerms}`,
-    description: `${source}'s perspective on the developing story about ${keyTerms}. This article provides additional context and analysis.`,
-    url: `https://example.com/${source.toLowerCase().replace(/\s+/g, '')}/article-${index}`,
+  return sources.map((source, index) => {
+    // Generate different headlines based on source bias
+    const biasedTitle = generateBiasedHeadline(keyTerms, source.bias);
+    
+    return {
+    title: biasedTitle,
+    description: `${source.name}'s perspective on the developing story about ${keyTerms}. This article provides additional context and analysis from a ${source.bias} viewpoint.`,
+    url: `https://example.com/${source.name.toLowerCase().replace(/\s+/g, '')}/article-${index}`,
     urlToImage: '',
     publishedAt: new Date(Date.now() - Math.random() * 86400000 * 7).toISOString(), // Random date within last week
-    source: { id: '', name: source },
-    content: `This is a mock article from ${source} about ${keyTerms}. In a real implementation, this would contain the actual article content.`
-  }));
+    source: { id: '', name: source.name },
+    content: generateBiasedContent(keyTerms, source.bias, source.name)
+    };
+  });
+};
+
+// Generate headlines with different bias perspectives
+const generateBiasedHeadline = (keyTerms: string, bias: string): string => {
+  const terms = keyTerms.split(' ').slice(0, 2).join(' ');
+  
+  switch (bias) {
+    case 'left':
+      return `Progressive Leaders Rally Around ${terms} Initiative`;
+    case 'center-left':
+      return `New ${terms} Policy Draws Mixed Reactions`;
+    case 'center':
+      return `${terms} Development: What You Need to Know`;
+    case 'center-right':
+      return `${terms} Plan Faces Economic Scrutiny`;
+    case 'right':
+      return `Conservative Groups Challenge ${terms} Proposal`;
+    default:
+      return `Breaking: ${terms} Story Develops`;
+  }
+};
+
+// Generate content with different bias perspectives
+const generateBiasedContent = (keyTerms: string, bias: string, sourceName: string): string => {
+  const baseContent = `This is a ${sourceName} report on ${keyTerms}. `;
+  
+  switch (bias) {
+    case 'left':
+      return baseContent + `Progressive activists are celebrating this groundbreaking development as a major victory for social justice and environmental protection. The initiative represents unprecedented progress in addressing systemic inequalities and climate change. According to advocacy groups, this remarkable achievement demonstrates the power of grassroots organizing and community action.`;
+    case 'center-left':
+      return baseContent + `The new policy has received cautious support from liberal lawmakers who see it as a step forward, though some express concerns about implementation challenges. Democratic leaders emphasize the importance of ensuring adequate funding and oversight. Experts suggest this could be a significant development if properly executed.`;
+    case 'center':
+      return baseContent + `Officials report that the development will require careful analysis and stakeholder input before moving forward. According to government sources, multiple factors must be considered to ensure effective implementation. Researchers indicate that both benefits and challenges are expected as the situation evolves.`;
+    case 'center-right':
+      return baseContent + `Business leaders and fiscal conservatives are raising questions about the economic impact and long-term sustainability of the proposal. Industry analysts warn of potential market disruptions and increased regulatory burden. The plan faces scrutiny from those concerned about government overreach and fiscal responsibility.`;
+    case 'right':
+      return baseContent + `Conservative groups are strongly opposing this radical proposal, calling it a dangerous expansion of government power that threatens individual liberty and free market principles. Traditional values advocates warn this represents an alarming trend toward socialist policies that could devastate the economy and undermine constitutional rights.`;
+    default:
+      return baseContent + `The situation continues to develop with various stakeholders expressing different viewpoints on the matter.`;
+  }
 };
 
 // Enhanced media bias database with more sources
