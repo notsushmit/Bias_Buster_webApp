@@ -86,8 +86,8 @@ export const en = {
       factuality: 'Factuality',
       emotionalLanguage: 'Emotional Language',
       politicalLeaning: 'Political leaning detected in content',
-      reliabilityAssessment: 'Reliability and accuracy assessment',
-      emotionalIntensity: 'Emotional intensity in language'
+      reliabilityAssessment: 'Factuality assessment (via ClaimBuster API)',
+      emotionalIntensity: 'Emotional intensity in language (via Hugging Face AI)'
     },
     bias: {
       left: 'Left',
