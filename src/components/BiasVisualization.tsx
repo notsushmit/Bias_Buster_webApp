@@ -16,22 +16,22 @@ export const BiasVisualization: React.FC<BiasVisualizationProps> = ({ biasData }
   const { t } = useLanguage();
   
   const getPoliticalBias = (score: number) => {
-    if (score <= -3) return { label: t('analyzer.bias.left'), color: 'from-blue-500 to-blue-600', icon: TrendingDown };
-    if (score <= -1) return { label: t('analyzer.bias.centerLeft'), color: 'from-blue-400 to-blue-500', icon: TrendingDown };
-    if (score <= 1) return { label: t('analyzer.bias.center'), color: 'from-gray-400 to-gray-500', icon: Minus };
-    if (score <= 3) return { label: t('analyzer.bias.centerRight'), color: 'from-red-400 to-red-500', icon: TrendingUp };
+    if (score <= -2.5) return { label: t('analyzer.bias.left'), color: 'from-blue-500 to-blue-600', icon: TrendingDown };
+    if (score <= -0.5) return { label: t('analyzer.bias.centerLeft'), color: 'from-blue-400 to-blue-500', icon: TrendingDown };
+    if (score <= 0.5) return { label: t('analyzer.bias.center'), color: 'from-gray-400 to-gray-500', icon: Minus };
+    if (score <= 2.5) return { label: t('analyzer.bias.centerRight'), color: 'from-red-400 to-red-500', icon: TrendingUp };
     return { label: t('analyzer.bias.right'), color: 'from-red-500 to-red-600', icon: TrendingUp };
   };
 
   const getFactualityData = (score: number) => {
-    if (score >= 8) return { label: t('analyzer.bias.high'), color: 'from-green-500 to-green-600', icon: CheckCircle };
-    if (score >= 6) return { label: t('analyzer.bias.medium'), color: 'from-yellow-500 to-yellow-600', icon: Shield };
+    if (score >= 8.0) return { label: t('analyzer.bias.high'), color: 'from-green-500 to-green-600', icon: CheckCircle };
+    if (score >= 6.5) return { label: t('analyzer.bias.medium'), color: 'from-yellow-500 to-yellow-600', icon: Shield };
     return { label: t('analyzer.bias.low'), color: 'from-red-500 to-red-600', icon: AlertTriangle };
   };
 
   const getEmotionalData = (score: number) => {
-    if (score <= 2) return { label: t('analyzer.bias.low'), color: 'from-green-500 to-green-600', icon: CheckCircle };
-    if (score <= 4) return { label: t('analyzer.bias.medium'), color: 'from-yellow-500 to-yellow-600', icon: Shield };
+    if (score <= 2.0) return { label: t('analyzer.bias.low'), color: 'from-green-500 to-green-600', icon: CheckCircle };
+    if (score <= 5.0) return { label: t('analyzer.bias.medium'), color: 'from-yellow-500 to-yellow-600', icon: Shield };
     return { label: t('analyzer.bias.high'), color: 'from-red-500 to-red-600', icon: AlertTriangle };
   };
 
