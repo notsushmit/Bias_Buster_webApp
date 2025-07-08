@@ -37,6 +37,8 @@ export const ArticleAnalyzer: React.FC = () => {
       // Step 2: Analyze bias and sentiment
       const biasAnalysis = await analyzeArticleBias(extractedArticle.content, extractedArticle.source);
       
+      console.log('Bias analysis completed:', biasAnalysis);
+      
       // Step 3: Get source bias rating
       const sourceBiasRating = getSourceBiasRating(extractedArticle.source);
       
@@ -66,7 +68,7 @@ export const ArticleAnalyzer: React.FC = () => {
           source: extractedArticle.source,
           publishDate: extractedArticle.publishDate,
           author: extractedArticle.author,
-          bias: sourceBiasRating?.bias || 'unknown',
+          bias: sourceBiasRating?.bias || 'center',
           factuality: biasAnalysis.factuality,
           sentiment: biasAnalysis.sentiment,
           url: url,
@@ -77,16 +79,13 @@ export const ArticleAnalyzer: React.FC = () => {
           factual: biasAnalysis.factuality,
           emotional: biasAnalysis.emotionalLanguage
         },
-        highlights: biasAnalysis.highlights.map(h => ({
-          text: h.text,
-          type: h.type,
-          explanation: h.explanation
-        })),
+        highlights: biasAnalysis.highlights || [],
         comparativeCoverage,
         socialReactions,
         extractedContent: extractedArticle.content
       };
       
+      console.log('Final analysis result:', result);
       setAnalysisResult(result);
     } catch (err) {
       console.error('Analysis error:', err);

@@ -14,93 +14,168 @@ export interface BiasAnalysis {
   }>;
 }
 
-// Simple sentiment analysis using keyword matching
-export const analyzeSentiment = async (text: string): Promise<{ sentiment: string; confidence: number }> => {
-  try {
-    const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'positive', 'success', 'achievement', 'progress', 'improvement', 'beneficial', 'effective', 'outstanding', 'remarkable'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'disgusting', 'outrageous', 'negative', 'failure', 'crisis', 'disaster', 'problem', 'issue', 'concern', 'disappointing', 'devastating'];
+// Real-time sentiment analysis using actual content
+export const analyzeSentiment = (text: string): { sentiment: string; confidence: number; score: number } => {
+  const positiveWords = [
+    'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'positive', 'success', 
+    'achievement', 'progress', 'improvement', 'beneficial', 'effective', 'outstanding', 
+    'remarkable', 'brilliant', 'superb', 'magnificent', 'exceptional', 'impressive',
+    'breakthrough', 'victory', 'triumph', 'prosperity', 'flourishing', 'thriving',
+    'celebrate', 'win', 'accomplish', 'advance', 'boost', 'enhance', 'upgrade'
+  ];
+  
+  const negativeWords = [
+    'bad', 'terrible', 'awful', 'horrible', 'disgusting', 'outrageous', 'negative', 'failure', 
+    'crisis', 'disaster', 'problem', 'issue', 'concern', 'disappointing', 'devastating',
+    'catastrophic', 'tragic', 'alarming', 'disturbing', 'shocking', 'appalling',
+    'scandal', 'corruption', 'fraud', 'violence', 'conflict', 'war', 'death',
+    'decline', 'collapse', 'crash', 'plummet', 'suffer', 'struggle', 'threat'
+  ];
+
+  const intensifiers = ['very', 'extremely', 'incredibly', 'absolutely', 'completely', 'totally', 'utterly', 'highly', 'deeply'];
+  
+  const words = text.toLowerCase().split(/\s+/);
+  let positiveScore = 0;
+  let negativeScore = 0;
+  
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i].replace(/[^\w]/g, '');
+    let multiplier = 1;
     
-    const words = text.toLowerCase().split(/\s+/);
-    let positiveCount = 0;
-    let negativeCount = 0;
+    // Check for intensifiers
+    if (i > 0 && intensifiers.includes(words[i - 1])) {
+      multiplier = 1.8;
+    }
     
-    words.forEach(word => {
-      if (positiveWords.some(pw => word.includes(pw))) positiveCount++;
-      if (negativeWords.some(nw => word.includes(nw))) negativeCount++;
-    });
-    
-    const total = positiveCount + negativeCount;
-    if (total === 0) return { sentiment: 'neutral', confidence: 0.5 };
-    
-    const positiveRatio = positiveCount / total;
-    
-    if (positiveRatio > 0.6) return { sentiment: 'positive', confidence: positiveRatio };
-    if (positiveRatio < 0.4) return { sentiment: 'negative', confidence: 1 - positiveRatio };
-    return { sentiment: 'neutral', confidence: 0.5 };
-  } catch (error) {
-    console.error('Error analyzing sentiment:', error);
-    return { sentiment: 'neutral', confidence: 0.5 };
+    if (positiveWords.some(pw => word.includes(pw) || pw.includes(word))) {
+      positiveScore += multiplier;
+    }
+    if (negativeWords.some(nw => word.includes(nw) || nw.includes(word))) {
+      negativeScore += multiplier;
+    }
   }
+  
+  const totalSentimentWords = positiveScore + negativeScore;
+  if (totalSentimentWords === 0) {
+    return { sentiment: 'neutral', confidence: 0.5, score: 0 };
+  }
+  
+  const positiveRatio = positiveScore / totalSentimentWords;
+  const sentimentStrength = totalSentimentWords / Math.max(words.length / 100, 1);
+  const confidence = Math.min(sentimentStrength, 1);
+  
+  let sentiment: string;
+  let score: number;
+  
+  if (positiveRatio > 0.65) {
+    sentiment = 'positive';
+    score = (positiveRatio - 0.5) * 10; // Scale to 0-5
+  } else if (positiveRatio < 0.35) {
+    sentiment = 'negative';
+    score = -(0.5 - positiveRatio) * 10; // Scale to -5-0
+  } else {
+    sentiment = 'neutral';
+    score = 0;
+  }
+  
+  return { sentiment, confidence, score };
 };
 
-// Simple toxicity detection using keyword matching
-export const analyzeToxicity = async (text: string): Promise<number> => {
-  try {
-    const toxicWords = ['hate', 'stupid', 'idiot', 'moron', 'disgusting', 'pathetic', 'worthless', 'garbage', 'trash', 'scum'];
-    const emotionalWords = ['outrageous', 'shocking', 'devastating', 'catastrophic', 'unprecedented', 'explosive', 'bombshell', 'scandalous'];
-    
-    const words = text.toLowerCase().split(/\s+/);
-    let toxicCount = 0;
-    let emotionalCount = 0;
-    
-    words.forEach(word => {
-      if (toxicWords.some(tw => word.includes(tw))) toxicCount++;
-      if (emotionalWords.some(ew => word.includes(ew))) emotionalCount++;
-    });
-    
-    const totalWords = words.length;
-    const toxicityScore = ((toxicCount * 2 + emotionalCount) / totalWords) * 100;
-    
-    return Math.min(toxicityScore, 10); // Cap at 10
-  } catch (error) {
-    console.error('Error analyzing toxicity:', error);
-    return 0;
-  }
+// Dynamic emotional language detection based on actual content
+export const analyzeEmotionalLanguage = (text: string): number => {
+  const emotionalWords = {
+    extreme: ['outrageous', 'shocking', 'devastating', 'catastrophic', 'unprecedented', 'explosive', 
+              'bombshell', 'scandalous', 'horrific', 'terrifying', 'incredible', 'unbelievable',
+              'mind-blowing', 'earth-shattering', 'jaw-dropping', 'breathtaking', 'sensational',
+              'dramatic', 'stunning', 'astounding', 'phenomenal', 'extraordinary'],
+    high: ['concerning', 'troubling', 'worrying', 'surprising', 'remarkable', 'notable',
+           'significant', 'important', 'serious', 'major', 'critical', 'urgent', 'alarming',
+           'disturbing', 'amazing', 'fantastic', 'wonderful', 'terrible', 'awful'],
+    medium: ['interesting', 'notable', 'relevant', 'related', 'connected', 'associated',
+             'considerable', 'substantial', 'meaningful', 'noteworthy'],
+    low: ['some', 'certain', 'particular', 'specific', 'general', 'basic', 'simple']
+  };
+
+  // Detect formatting patterns that indicate emotional language
+  const capsPattern = /\b[A-Z]{3,}\b/g; // Words in ALL CAPS
+  const exclamationPattern = /!{1,}/g; // Exclamation marks
+  const questionPattern = /\?{2,}/g; // Multiple question marks
+  const quotesPattern = /"[^"]*"/g; // Quoted text (often emotional)
+  
+  const words = text.toLowerCase().split(/\s+/);
+  let emotionalScore = 0;
+  let totalWords = words.length;
+  
+  // Score based on emotional words with different weights
+  words.forEach(word => {
+    const cleanWord = word.replace(/[^\w]/g, '');
+    if (emotionalWords.extreme.some(ew => cleanWord.includes(ew) || ew.includes(cleanWord))) {
+      emotionalScore += 4;
+    } else if (emotionalWords.high.some(ew => cleanWord.includes(ew) || ew.includes(cleanWord))) {
+      emotionalScore += 3;
+    } else if (emotionalWords.medium.some(ew => cleanWord.includes(ew) || ew.includes(cleanWord))) {
+      emotionalScore += 2;
+    } else if (emotionalWords.low.some(ew => cleanWord.includes(ew) || ew.includes(cleanWord))) {
+      emotionalScore += 1;
+    }
+  });
+  
+  // Score based on formatting patterns
+  const capsMatches = text.match(capsPattern) || [];
+  const exclamationMatches = text.match(exclamationPattern) || [];
+  const questionMatches = text.match(questionPattern) || [];
+  const quotesMatches = text.match(quotesPattern) || [];
+  
+  emotionalScore += capsMatches.length * 3;
+  emotionalScore += exclamationMatches.length * 2;
+  emotionalScore += questionMatches.length * 1.5;
+  emotionalScore += quotesMatches.length * 1;
+  
+  // Check for emotional punctuation patterns
+  if (text.includes('...')) emotionalScore += 1;
+  if (text.includes('--')) emotionalScore += 0.5;
+  
+  // Normalize to 0-10 scale based on content length
+  const normalizedScore = Math.min((emotionalScore / Math.max(totalWords / 50, 1)) * 2, 10);
+  
+  return Math.round(normalizedScore * 10) / 10;
 };
 
-// Custom bias detection using keyword analysis
+// Dynamic bias detection with real keyword analysis
 export const detectBiasKeywords = (text: string): Array<{ text: string; type: string; explanation: string; startIndex: number; endIndex: number }> => {
-  const biasKeywords = {
+  const biasPatterns = {
     emotional: [
-      { word: 'devastating', explanation: 'Emotionally charged adjective' },
-      { word: 'shocking', explanation: 'Sensationalized language' },
-      { word: 'outrageous', explanation: 'Inflammatory descriptor' },
-      { word: 'unprecedented', explanation: 'Hyperbolic language' },
-      { word: 'catastrophic', explanation: 'Extreme emotional language' },
-      { word: 'miraculous', explanation: 'Overly positive framing' },
-      { word: 'stunning', explanation: 'Sensationalized descriptor' },
-      { word: 'explosive', explanation: 'Dramatic language' },
-      { word: 'bombshell', explanation: 'Sensationalized term' }
+      { pattern: /\b(devastating|catastrophic|shocking|outrageous|unprecedented)\b/gi, explanation: 'Emotionally charged language that may exaggerate impact' },
+      { pattern: /\b(explosive|bombshell|stunning|mind-blowing|earth-shattering)\b/gi, explanation: 'Sensationalized language designed to provoke reaction' },
+      { pattern: /\b(miraculous|incredible|unbelievable|phenomenal|extraordinary)\b/gi, explanation: 'Hyperbolic language that may overstate significance' },
+      { pattern: /\b(horrific|terrifying|appalling|disgusting|revolting)\b/gi, explanation: 'Extreme emotional descriptors that may bias perception' }
     ],
-    bias: [
-      { word: 'radical', explanation: 'Politically loaded term' },
-      { word: 'extremist', explanation: 'Partisan framing' },
-      { word: 'liberal elite', explanation: 'Political dog whistle' },
-      { word: 'conservative agenda', explanation: 'Partisan characterization' },
-      { word: 'fake news', explanation: 'Politically charged phrase' },
-      { word: 'mainstream media', explanation: 'Loaded institutional reference' },
-      { word: 'deep state', explanation: 'Conspiracy-oriented language' },
-      { word: 'establishment', explanation: 'Anti-institutional framing' }
+    leftBias: [
+      { pattern: /\b(progressive|social justice|climate crisis|systemic racism|wealth inequality)\b/gi, explanation: 'Language commonly associated with left-leaning perspectives' },
+      { pattern: /\b(corporate greed|tax the rich|medicare for all|green new deal|reproductive rights)\b/gi, explanation: 'Terminology often used in progressive political discourse' },
+      { pattern: /\b(fascist|authoritarian|far-right|extremist|white supremacist)\b/gi, explanation: 'Strong negative characterizations often used by left-leaning sources' }
+    ],
+    rightBias: [
+      { pattern: /\b(traditional values|law and order|border security|fiscal responsibility|free market)\b/gi, explanation: 'Language commonly associated with right-leaning perspectives' },
+      { pattern: /\b(socialist|communist|radical left|liberal elite|mainstream media)\b/gi, explanation: 'Terminology often used in conservative political discourse' },
+      { pattern: /\b(deep state|fake news|cancel culture|woke agenda|virtue signaling)\b/gi, explanation: 'Phrases commonly used to dismiss opposing viewpoints' }
+    ],
+    factual: [
+      { pattern: /\b(according to|sources say|data shows|study finds|research indicates)\b/gi, explanation: 'Proper source attribution - sign of factual reporting' },
+      { pattern: /\b(allegedly|reportedly|appears to|seems to|may have)\b/gi, explanation: 'Cautious language indicating unverified claims - good journalism' },
+      { pattern: /\b(confirmed|verified|documented|established|proven)\b/gi, explanation: 'Language indicating fact-checking and verification' }
     ]
   };
 
   const highlights: Array<{ text: string; type: string; explanation: string; startIndex: number; endIndex: number }> = [];
   
-  Object.entries(biasKeywords).forEach(([type, keywords]) => {
-    keywords.forEach(({ word, explanation }) => {
-      const regex = new RegExp(`\\b${word}\\b`, 'gi');
+  Object.entries(biasPatterns).forEach(([category, patterns]) => {
+    patterns.forEach(({ pattern, explanation }) => {
       let match;
-      while ((match = regex.exec(text)) !== null) {
+      while ((match = pattern.exec(text)) !== null) {
+        const type = category === 'leftBias' || category === 'rightBias' ? 'bias' : 
+                    category === 'emotional' ? 'emotional' : 'factual';
+        
         highlights.push({
           text: match[0],
           type,
@@ -115,29 +190,194 @@ export const detectBiasKeywords = (text: string): Array<{ text: string; type: st
   return highlights;
 };
 
-// Main bias analysis function
+// Dynamic political bias detection based on content analysis
+export const detectPoliticalBias = (content: string, sourceName: string): number => {
+  const leftKeywords = [
+    'progressive', 'social justice', 'climate change', 'climate crisis', 'inequality', 'diversity', 'inclusion', 
+    'environmental', 'renewable', 'sustainable', 'universal healthcare', 'minimum wage', 'living wage',
+    'gun control', 'reproductive rights', 'immigration reform', 'wealth tax', 'medicare for all',
+    'green new deal', 'systemic racism', 'police reform', 'lgbtq rights', 'affordable housing',
+    'workers rights', 'union', 'collective bargaining', 'public option', 'student debt relief'
+  ];
+  
+  const rightKeywords = [
+    'conservative', 'traditional values', 'free market', 'law and order', 'border security', 
+    'fiscal responsibility', 'deregulation', 'second amendment', 'pro-life', 'family values',
+    'small government', 'tax cuts', 'military strength', 'national security', 'religious freedom',
+    'school choice', 'constitutional rights', 'individual liberty', 'free enterprise', 'patriotism',
+    'states rights', 'personal responsibility', 'limited government', 'free speech', 'capitalism'
+  ];
+
+  const leftNegativeFraming = [
+    'corporate greed', 'tax breaks for the wealthy', 'climate denial', 'voter suppression',
+    'authoritarian', 'fascist', 'far-right', 'extremist', 'white supremacist'
+  ];
+
+  const rightNegativeFraming = [
+    'socialist', 'communist', 'radical left', 'liberal elite', 'mainstream media',
+    'deep state', 'fake news', 'cancel culture', 'woke agenda', 'virtue signaling'
+  ];
+  
+  const contentLower = content.toLowerCase();
+  
+  let leftScore = 0;
+  let rightScore = 0;
+  
+  // Count positive framing keywords
+  leftKeywords.forEach(keyword => {
+    const regex = new RegExp(`\\b${keyword.replace(/\s+/g, '\\s+')}\\b`, 'g');
+    const matches = contentLower.match(regex) || [];
+    leftScore += matches.length;
+  });
+  
+  rightKeywords.forEach(keyword => {
+    const regex = new RegExp(`\\b${keyword.replace(/\s+/g, '\\s+')}\\b`, 'g');
+    const matches = contentLower.match(regex) || [];
+    rightScore += matches.length;
+  });
+
+  // Count negative framing (adds to opposite side)
+  leftNegativeFraming.forEach(phrase => {
+    const regex = new RegExp(`\\b${phrase.replace(/\s+/g, '\\s+')}\\b`, 'g');
+    const matches = contentLower.match(regex) || [];
+    leftScore += matches.length * 1.5; // Weight negative framing more heavily
+  });
+
+  rightNegativeFraming.forEach(phrase => {
+    const regex = new RegExp(`\\b${phrase.replace(/\s+/g, '\\s+')}\\b`, 'g');
+    const matches = contentLower.match(regex) || [];
+    rightScore += matches.length * 1.5;
+  });
+  
+  // Get source bias as baseline
+  const sourceBias = getSourcePoliticalBias(sourceName);
+  
+  const totalKeywords = leftScore + rightScore;
+  if (totalKeywords === 0) {
+    return sourceBias; // Return source bias if no content indicators
+  }
+  
+  // Calculate content bias (-5 to +5 scale)
+  const contentBias = ((rightScore - leftScore) / totalKeywords) * 5;
+  
+  // Combine source bias (40%) with content bias (60%)
+  const finalBias = (sourceBias * 0.4) + (contentBias * 0.6);
+  
+  return Math.max(-5, Math.min(5, finalBias));
+};
+
+// Dynamic factuality calculation based on content quality
+export const calculateFactuality = (sourceName: string, content: string): number => {
+  // Base factuality on source reputation
+  const sourceFactuality: Record<string, number> = {
+    'reuters': 9.2, 'associated press': 9.1, 'bbc': 8.8, 'npr': 8.9,
+    'wall street journal': 8.7, 'new york times': 8.1, 'washington post': 8.2,
+    'cnn': 7.4, 'fox news': 6.8, 'guardian': 8.3, 'financial times': 8.6,
+    'abc news': 8.0, 'cbs news': 7.8, 'nbc news': 7.6, 'usa today': 7.2,
+    'politico': 7.5, 'axios': 7.8, 'bloomberg': 8.4, 'economist': 8.5,
+    'breitbart': 5.5, 'huffpost': 6.9, 'daily wire': 6.0, 'vox': 7.0
+  };
+
+  const normalizedName = sourceName.toLowerCase();
+  let baseScore = 6.0; // Default score for unknown sources
+  
+  for (const [source, score] of Object.entries(sourceFactuality)) {
+    if (normalizedName.includes(source) || source.includes(normalizedName)) {
+      baseScore = score;
+      break;
+    }
+  }
+
+  // Analyze content quality indicators
+  const contentLength = content.length;
+  let qualityScore = 0;
+
+  // Positive indicators
+  const sourceCitations = content.match(/according to|sources say|reported by|officials said|spokesperson|statement from|data shows|study finds|research indicates/gi) || [];
+  const directQuotes = content.match(/"[^"]{20,}"/g) || [];
+  const statistics = content.match(/\d+(\.\d+)?%|\d+\s*(million|billion|thousand|percent)/g) || [];
+  const dateReferences = content.match(/yesterday|today|this week|last month|january|february|march|april|may|june|july|august|september|october|november|december|\d{4}|\d{1,2}\/\d{1,2}\/\d{2,4}/gi) || [];
+  const expertSources = content.match(/professor|doctor|researcher|analyst|expert|specialist|director|chief|president|ceo/gi) || [];
+  const factualLanguage = content.match(/data|evidence|research|study|analysis|investigation|report|survey|poll/gi) || [];
+
+  // Calculate quality indicators (per 1000 characters)
+  const density = 1000 / Math.max(contentLength, 1000);
+  qualityScore += Math.min(sourceCitations.length * density * 0.5, 1.5);
+  qualityScore += Math.min(directQuotes.length * density * 0.3, 1.0);
+  qualityScore += Math.min(statistics.length * density * 0.4, 1.0);
+  qualityScore += Math.min(dateReferences.length * density * 0.2, 0.5);
+  qualityScore += Math.min(expertSources.length * density * 0.3, 0.8);
+  qualityScore += Math.min(factualLanguage.length * density * 0.2, 0.5);
+
+  // Negative indicators
+  const opinionLanguage = content.match(/i think|i believe|in my opinion|it seems|arguably|presumably|supposedly|clearly|obviously/gi) || [];
+  const sensationalLanguage = content.match(/shocking|outrageous|unbelievable|incredible|devastating|explosive|bombshell/gi) || [];
+  const unsourcedClaims = content.match(/many people say|it is said|rumors suggest|sources claim|allegedly/gi) || [];
+
+  const opinionPenalty = Math.min(opinionLanguage.length * density * 0.3, 1.0);
+  const sensationalPenalty = Math.min(sensationalLanguage.length * density * 0.4, 1.5);
+  const unsourcedPenalty = Math.min(unsourcedClaims.length * density * 0.2, 0.8);
+
+  // Calculate final score
+  const finalScore = baseScore + qualityScore - opinionPenalty - sensationalPenalty - unsourcedPenalty;
+  
+  return Math.max(1, Math.min(10, Math.round(finalScore * 10) / 10));
+};
+
+// Helper function for source political bias
+const getSourcePoliticalBias = (sourceName: string): number => {
+  const biasMap: Record<string, number> = {
+    // Left-leaning sources
+    'huffpost': -3.5, 'msnbc': -3.2, 'vox': -2.8, 'slate': -2.5, 'salon': -3.0,
+    'cnn': -2.0, 'new york times': -1.8, 'washington post': -1.6, 'guardian': -2.2,
+    'npr': -1.2, 'bbc': -0.8, 'abc news': -0.6, 'cbs news': -0.5, 'nbc news': -0.7,
+    'politico': -0.8, 'mother jones': -3.5, 'the nation': -3.2,
+    
+    // Center sources
+    'reuters': 0, 'associated press': 0, 'bloomberg': 0.2, 'axios': -0.2, 'usa today': 0.1,
+    'economist': 0.3, 'financial times': 0.4, 'christian science monitor': 0,
+    
+    // Right-leaning sources
+    'wall street journal': 1.2, 'fox news': 3.5, 'breitbart': 4.2, 'daily wire': 3.8,
+    'new york post': 2.2, 'washington times': 2.8, 'national review': 3.2,
+    'daily caller': 3.6, 'townhall': 3.8, 'federalist': 3.4, 'newsmax': 4.0,
+    'oan': 4.5, 'gateway pundit': 4.8
+  };
+
+  const normalizedName = sourceName.toLowerCase();
+  for (const [source, bias] of Object.entries(biasMap)) {
+    if (normalizedName.includes(source) || source.includes(normalizedName)) {
+      return bias;
+    }
+  }
+  return 0; // Default to center if unknown
+};
+
+// Main analysis function with real dynamic results
 export const analyzeArticleBias = async (content: string, sourceName: string): Promise<BiasAnalysis> => {
   try {
-    // Run analyses
-    const [sentimentResult, toxicityScore] = await Promise.all([
-      analyzeSentiment(content),
-      analyzeToxicity(content)
-    ]);
-
-    // Detect bias keywords
+    console.log('Starting dynamic bias analysis for:', sourceName);
+    console.log('Content length:', content.length);
+    
+    // Run real-time analyses
+    const sentimentResult = analyzeSentiment(content);
+    const emotionalScore = analyzeEmotionalLanguage(content);
     const highlights = detectBiasKeywords(content);
-
-    // Calculate political bias based on source and content analysis
-    const sourceBias = getSourcePoliticalBias(sourceName);
-    const contentBias = calculateContentBias(content);
-    const politicalBias = (sourceBias + contentBias) / 2;
-
-    // Calculate factuality based on source reputation and content quality
+    const politicalBias = detectPoliticalBias(content, sourceName);
     const factuality = calculateFactuality(sourceName, content);
 
+    console.log('Dynamic analysis results:', {
+      politicalBias: Math.round(politicalBias * 10) / 10,
+      emotionalScore: Math.round(emotionalScore * 10) / 10,
+      factuality,
+      sentiment: sentimentResult.sentiment,
+      highlightsCount: highlights.length,
+      sentimentScore: sentimentResult.score
+    });
+
     return {
-      politicalBias,
-      emotionalLanguage: toxicityScore,
+      politicalBias: Math.round(politicalBias * 10) / 10,
+      emotionalLanguage: Math.round(emotionalScore * 10) / 10,
       factuality,
       sentiment: sentimentResult.sentiment as 'positive' | 'negative' | 'neutral',
       highlights: highlights.map(h => ({
@@ -147,97 +387,13 @@ export const analyzeArticleBias = async (content: string, sourceName: string): P
     };
   } catch (error) {
     console.error('Error analyzing article bias:', error);
+    // Return neutral values instead of static ones
     return {
       politicalBias: 0,
       emotionalLanguage: 0,
-      factuality: 5,
+      factuality: 6.0,
       sentiment: 'neutral',
       highlights: []
     };
   }
-};
-
-// Helper functions
-const getSourcePoliticalBias = (sourceName: string): number => {
-  const biasMap: Record<string, number> = {
-    'fox news': 3,
-    'breitbart': 4,
-    'daily wire': 3,
-    'cnn': -2,
-    'msnbc': -3,
-    'huffpost': -3,
-    'new york times': -1,
-    'washington post': -1,
-    'wall street journal': 1,
-    'reuters': 0,
-    'associated press': 0,
-    'bbc': -0.5,
-    'npr': -1,
-    'guardian': -1.5,
-    'financial times': 0.5
-  };
-
-  const normalizedName = sourceName.toLowerCase();
-  for (const [source, bias] of Object.entries(biasMap)) {
-    if (normalizedName.includes(source)) {
-      return bias;
-    }
-  }
-  return 0;
-};
-
-const calculateContentBias = (content: string): number => {
-  const leftKeywords = ['progressive', 'social justice', 'climate change', 'inequality', 'diversity', 'inclusion', 'environmental', 'renewable', 'sustainable'];
-  const rightKeywords = ['conservative', 'traditional values', 'free market', 'law and order', 'border security', 'fiscal responsibility', 'deregulation'];
-  
-  const leftCount = leftKeywords.reduce((count, keyword) => 
-    count + (content.toLowerCase().match(new RegExp(keyword, 'g')) || []).length, 0);
-  const rightCount = rightKeywords.reduce((count, keyword) => 
-    count + (content.toLowerCase().match(new RegExp(keyword, 'g')) || []).length, 0);
-  
-  const total = leftCount + rightCount;
-  if (total === 0) return 0;
-  
-  return ((rightCount - leftCount) / total) * 3; // Scale to -3 to 3
-};
-
-const calculateFactuality = (sourceName: string, content: string): number => {
-  // Base factuality on source reputation
-  const sourceFactuality: Record<string, number> = {
-    'reuters': 9.2,
-    'associated press': 9.1,
-    'bbc': 8.8,
-    'npr': 8.9,
-    'wall street journal': 8.7,
-    'new york times': 8.1,
-    'washington post': 8.2,
-    'cnn': 7.4,
-    'fox news': 6.8,
-    'guardian': 8.3,
-    'financial times': 8.6
-  };
-
-  const normalizedName = sourceName.toLowerCase();
-  let baseScore = 7.0; // Default score
-  
-  for (const [source, score] of Object.entries(sourceFactuality)) {
-    if (normalizedName.includes(source)) {
-      baseScore = score;
-      break;
-    }
-  }
-
-  // Adjust based on content quality indicators
-  const hasSourceCitations = /according to|sources say|reported by|officials said|spokesperson|statement/i.test(content);
-  const hasQuotes = /"[^"]*"/g.test(content);
-  const hasNumbers = /\d+%|\d+\s*(million|billion|thousand|percent)/g.test(content);
-  const hasDateReferences = /yesterday|today|this week|last month|january|february|march|april|may|june|july|august|september|october|november|december/i.test(content);
-  
-  let adjustment = 0;
-  if (hasSourceCitations) adjustment += 0.3;
-  if (hasQuotes) adjustment += 0.2;
-  if (hasNumbers) adjustment += 0.2;
-  if (hasDateReferences) adjustment += 0.1;
-  
-  return Math.min(10, baseScore + adjustment);
 };
