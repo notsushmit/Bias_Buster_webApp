@@ -78,7 +78,7 @@ export const ArticleHighlights: React.FC<ArticleHighlightsProps> = ({ highlights
                     : highlight.type === 'bias'
                     ? 'bg-gradient-to-br from-red-500 to-pink-600'
                     : 'bg-gradient-to-br from-green-500 to-emerald-600'
-              }`}>
+                }`}>
                   {highlight.type === 'emotional' ? (
                     <Zap className="w-6 h-6 text-white" />
                   ) : highlight.type === 'bias' ? (
@@ -155,25 +155,3 @@ export const ArticleHighlights: React.FC<ArticleHighlightsProps> = ({ highlights
 import { useBias } from '../context/BiasContext';
 import { useLanguage } from '../context/LanguageContext';
 import { CheckCircle } from 'lucide-react';
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    highlight.type === 'emotional' 
-                      ? 'bg-yellow-500/20 text-yellow-400' 
-                      : 'bg-red-500/20 text-red-400'
-                  }`}>
-                    {highlight.type === 'emotional' ? 'Emotional Language' : 'Potential Bias'}
-                  </span>
-                </div>
-                <p className="text-white font-medium mb-1">"{highlight.text}"</p>
-                <p className="text-gray-300 text-sm">{highlight.explanation}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
