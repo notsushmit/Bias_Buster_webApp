@@ -4,7 +4,7 @@ A comprehensive web application that analyzes news articles for bias, factuality
 
 ## 🌐 Live Demo
 
-**[View Live Application](https://leafy-chimera-e2570b.netlify.app/)**
+**[View Live Application](https://peaceful-heliotrope-f0bb38.netlify.app/)**
 
 ## 📽 Demo Video
 https://drive.google.com/file/d/1pO6EhtGocrKJNdtNkgN2m9-Z2dh0F5hp/view
