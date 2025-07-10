@@ -22,7 +22,6 @@ export const extractArticleFromUrl = async (url: string): Promise<ExtractedArtic
     const proxyServices = [
       `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
       `https://corsproxy.io/?${encodeURIComponent(url)}`,
-      `https://cors-anywhere.herokuapp.com/${url}`,
       `https://thingproxy.freeboard.io/fetch/${url}`
     ];
     
@@ -36,34 +35,31 @@ export const extractArticleFromUrl = async (url: string): Promise<ExtractedArtic
           }
         });
         
-        htmlContent = response.data.contents || response.data;
+        // Handle different proxy response formats
+        if (typeof response.data === 'object' && response.data.contents) {
+          htmlContent = response.data.contents;
+        } else if (typeof response.data === 'string') {
+          htmlContent = response.data;
+        } else {
+          console.log('Unexpected response format from proxy');
+          continue;
+        }
         
         if (htmlContent && htmlContent.length > 500) {
           console.log('Successfully fetched content, length:', htmlContent.length);
           break;
         }
       } catch (proxyError) {
-        console.log(`Proxy ${proxyUrl} failed:`, proxyError.message);
+        console.log(`Proxy failed:`, proxyError.response?.status || proxyError.message);
         continue;
       }
     }
     
     if (!htmlContent || htmlContent.length < 500) {
-      console.log('All proxies failed or insufficient content, trying direct fetch...');
+      console.log('All proxies failed or returned insufficient content');
       
-      // Try direct fetch as last resort
-      try {
-        response = await axios.get(url, { 
-          timeout: 10000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        });
-        htmlContent = response.data;
-      } catch (directError) {
-        console.log('Direct fetch also failed:', directError.message);
-        throw new Error('Unable to fetch article content from any source');
-      }
+      // Direct fetch will likely fail due to CORS, but provide helpful error message
+      throw new Error('Unable to fetch article content. This may be due to CORS restrictions or the website blocking automated access. Try using a different article URL or consider using a server-side solution for reliable content extraction.');
     }
     
     if (!htmlContent || htmlContent.length < 100) {
