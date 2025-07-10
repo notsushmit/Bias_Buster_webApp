@@ -213,7 +213,7 @@ const extractTextFromElement = (element: Element): string => {
   const unwantedChildren = clone.querySelectorAll(
     'script, style, nav, header, footer, aside, .ad, .advertisement, ' +
     '.social-share, .comments, .related, .newsletter, .subscription, ' +
-    '.author-bio, '.tags', '.social-media'
+    '.author-bio, .tags, .social-media'
   );
   unwantedChildren.forEach(el => el.remove());
   
