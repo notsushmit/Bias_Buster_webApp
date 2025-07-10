@@ -31,7 +31,7 @@ export const ArticleAnalyzer: React.FC = () => {
       // Step 1: Extract article content
       const extractedArticle = await extractArticleFromUrl(url);
       if (!extractedArticle) {
-        throw new Error('Unable to extract article content. Please try a different URL.');
+        throw new Error(t('analyzer.errors.extractionFailed'));
       }
 
       // Step 2: Analyze bias and sentiment
@@ -89,7 +89,7 @@ export const ArticleAnalyzer: React.FC = () => {
       setAnalysisResult(result);
     } catch (err) {
       console.error('Analysis error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during analysis. Please try again.');
+      setError(err instanceof Error ? err.message : t('analyzer.errors.analysisGeneral'));
     } finally {
       setAnalyzing(false);
     }
@@ -199,9 +199,9 @@ export const ArticleAnalyzer: React.FC = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {[
-              'https://www.bbc.com/news/world-12345678',
-              'https://www.reuters.com/world/sample-article',
-              'https://www.cnn.com/2024/01/01/politics/sample-news'
+              'https://www.bbc.com/news',
+              'https://www.reuters.com',
+              'https://www.cnn.com'
             ].map((exampleUrl, index) => (
               <button
                 key={index}
@@ -212,7 +212,7 @@ export const ArticleAnalyzer: React.FC = () => {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
                 }`}
               >
-                {new URL(exampleUrl).hostname.replace('www.', '')} (Demo)
+                {new URL(exampleUrl).hostname.replace('www.', '')}
               </button>
             ))}
           </div>
