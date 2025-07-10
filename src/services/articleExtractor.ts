@@ -10,70 +10,88 @@ export interface ExtractedArticle {
   imageUrl?: string;
 }
 
-// Enhanced article extraction with multiple fallback methods
+// Real article extraction using free APIs and CORS proxies
 export const extractArticleFromUrl = async (url: string): Promise<ExtractedArticle | null> => {
   try {
     console.log('Extracting article from:', url);
     
-    // Method 1: Try using AllOrigins proxy with better error handling
     let response;
     let htmlContent = '';
     
-    try {
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-      response = await axios.get(proxyUrl, { timeout: 15000 });
-      htmlContent = response.data.contents || response.data;
-      console.log('AllOrigins successful, content length:', htmlContent.length);
-    } catch (proxyError) {
-      console.log('AllOrigins failed, trying alternative method...');
-      
-      // Method 2: Try using CORS-anywhere alternative
+    // Try multiple free CORS proxy services
+    const proxyServices = [
+      `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+      `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      `https://cors-anywhere.herokuapp.com/${url}`,
+      `https://thingproxy.freeboard.io/fetch/${url}`
+    ];
+    
+    for (const proxyUrl of proxyServices) {
       try {
-        const altProxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-        response = await axios.get(altProxyUrl, { timeout: 15000 });
-        htmlContent = response.data;
-        console.log('CORS proxy successful, content length:', htmlContent.length);
-      } catch (altError) {
-        console.log('Alternative proxy failed, using direct fetch...');
+        console.log('Trying proxy:', proxyUrl);
+        response = await axios.get(proxyUrl, { 
+          timeout: 15000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
         
-        // Method 3: Direct fetch (may fail due to CORS)
-        try {
-          response = await axios.get(url, { timeout: 10000 });
-          htmlContent = response.data;
-          console.log('Direct fetch successful, content length:', htmlContent.length);
-        } catch (directError) {
-          console.log('All extraction methods failed, generating fallback content');
-          return generateFallbackArticle(url);
+        htmlContent = response.data.contents || response.data;
+        
+        if (htmlContent && htmlContent.length > 500) {
+          console.log('Successfully fetched content, length:', htmlContent.length);
+          break;
         }
+      } catch (proxyError) {
+        console.log(`Proxy ${proxyUrl} failed:`, proxyError.message);
+        continue;
+      }
+    }
+    
+    if (!htmlContent || htmlContent.length < 500) {
+      console.log('All proxies failed or insufficient content, trying direct fetch...');
+      
+      // Try direct fetch as last resort
+      try {
+        response = await axios.get(url, { 
+          timeout: 10000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        htmlContent = response.data;
+      } catch (directError) {
+        console.log('Direct fetch also failed:', directError.message);
+        throw new Error('Unable to fetch article content from any source');
       }
     }
     
     if (!htmlContent || htmlContent.length < 100) {
-      console.log('Insufficient HTML content, generating fallback');
-      return generateFallbackArticle(url);
+      throw new Error('Insufficient HTML content retrieved');
     }
     
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
     
-    // Enhanced title extraction
+    // Extract article components
     const title = extractTitle(doc, url);
-    
-    // Enhanced content extraction
     const content = extractContent(doc);
-    
-    // Enhanced metadata extraction
     const author = extractAuthor(doc);
     const publishDate = extractPublishDate(doc);
     const source = extractSource(doc, url);
     const imageUrl = extractImageUrl(doc);
     
     // Validate extracted data
-    if (!title || !content || content.length < 50) {
-      throw new Error('Insufficient content extracted');
+    if (!title || !content || content.length < 200) {
+      throw new Error('Insufficient article content extracted');
     }
     
-    console.log('Successfully extracted article:', { title: title.substring(0, 50) + '...', contentLength: content.length });
+    console.log('Successfully extracted article:', { 
+      title: title.substring(0, 50) + '...', 
+      contentLength: content.length,
+      source,
+      author
+    });
     
     return {
       title: title.trim(),
@@ -87,47 +105,10 @@ export const extractArticleFromUrl = async (url: string): Promise<ExtractedArtic
 
   } catch (error) {
     console.error('Error extracting article:', error);
-    return generateFallbackArticle(url);
+    throw error;
   }
 };
 
-// Generate fallback article with more realistic content for testing
-const generateFallbackArticle = (url: string): ExtractedArticle | null => {
-  try {
-    const urlObj = new URL(url);
-    const hostname = urlObj.hostname.replace('www.', '');
-    
-    // Generate different content based on the source to test bias detection
-    const fallbackContent = generateTestContent(hostname);
-    
-    return {
-      title: `${hostname} Article - ${new Date().toLocaleDateString()}`,
-      content: fallbackContent,
-      author: 'Staff Reporter',
-      publishDate: new Date().toISOString(),
-      source: hostname,
-      url
-    };
-  } catch {
-    return null;
-  }
-};
-
-// Generate test content with varying bias to demonstrate the analysis
-const generateTestContent = (source: string): string => {
-  const baseContent = `This is a news article from ${source}. `;
-  
-  // Add different content based on source to test bias detection
-  if (source.includes('cnn') || source.includes('msnbc')) {
-    return baseContent + `The progressive policies have shown remarkable success in addressing climate change and social justice issues. According to recent studies, these initiatives have led to significant improvements in environmental protection and wealth inequality reduction. Experts say this represents a breakthrough in sustainable governance. The data shows unprecedented progress in renewable energy adoption and healthcare accessibility.`;
-  } else if (source.includes('fox') || source.includes('breitbart')) {
-    return baseContent + `Conservative values and traditional approaches continue to demonstrate their effectiveness in maintaining law and order and fiscal responsibility. Free market solutions have proven successful in driving economic growth and individual liberty. According to analysts, these time-tested principles ensure national security and constitutional rights. The evidence shows strong support for limited government and personal responsibility.`;
-  } else if (source.includes('reuters') || source.includes('ap')) {
-    return baseContent + `According to official sources, the new policy implementation will affect various sectors of the economy. Data from government agencies indicates mixed results in early assessments. Researchers note that further analysis is needed to determine long-term impacts. The study findings suggest both opportunities and challenges ahead for stakeholders.`;
-  } else {
-    return baseContent + `Recent developments in the political landscape have sparked considerable debate among lawmakers and citizens. Various stakeholders have expressed different perspectives on the proposed changes. Officials report ongoing discussions to address concerns raised by multiple parties. The situation continues to evolve as more information becomes available.`;
-  }
-};
 // Enhanced title extraction with multiple selectors
 const extractTitle = (doc: Document, url: string): string => {
   const titleSelectors = [
@@ -173,7 +154,8 @@ const extractContent = (doc: Document): string => {
     '.advertisement', '.ad', '.ads', '.social-share', '.comments',
     '.related-articles', '.newsletter', '.subscription', '.paywall',
     '.cookie-notice', '.popup', '.modal', '.sidebar', '.menu',
-    '[class*="ad-"]', '[id*="ad-"]', '[class*="advertisement"]'
+    '[class*="ad-"]', '[id*="ad-"]', '[class*="advertisement"]',
+    '.social-media', '.share-buttons', '.author-bio', '.tags'
   ];
   
   unwantedSelectors.forEach(selector => {
@@ -230,7 +212,8 @@ const extractTextFromElement = (element: Element): string => {
   // Remove unwanted child elements
   const unwantedChildren = clone.querySelectorAll(
     'script, style, nav, header, footer, aside, .ad, .advertisement, ' +
-    '.social-share, .comments, .related, .newsletter, .subscription'
+    '.social-share, .comments, .related, .newsletter, .subscription, ' +
+    '.author-bio, '.tags', '.social-media'
   );
   unwantedChildren.forEach(el => el.remove());
   
@@ -259,7 +242,8 @@ const extractAuthor = (doc: Document): string => {
     '.post-author',
     '.by-author',
     '.author',
-    '.byline'
+    '.byline',
+    '[itemprop="author"]'
   ];
   
   for (const selector of authorSelectors) {
@@ -287,7 +271,8 @@ const extractPublishDate = (doc: Document): string => {
     '.publish-date',
     '.article-date',
     '.post-date',
-    '.date'
+    '.date',
+    '[itemprop="datePublished"]'
   ];
   
   for (const selector of dateSelectors) {
@@ -316,7 +301,8 @@ const extractSource = (doc: Document, url: string): string => {
     '[name="application-name"]',
     '.site-name',
     '.source-name',
-    '.publication-name'
+    '.publication-name',
+    '[itemprop="publisher"]'
   ];
   
   for (const selector of sourceSelectors) {
@@ -364,49 +350,4 @@ const extractImageUrl = (doc: Document): string | undefined => {
   }
   
   return undefined;
-};
-
-// Alternative extraction method using Readability-like algorithm
-export const extractReadableContent = (htmlContent: string): string => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlContent, 'text/html');
-  
-  // Score paragraphs based on content quality
-  const paragraphs = Array.from(doc.querySelectorAll('p'));
-  const scoredParagraphs = paragraphs.map(p => {
-    const text = p.textContent || '';
-    let score = 0;
-    
-    // Positive scoring criteria
-    if (text.length > 50) score += 1;
-    if (text.length > 100) score += 2;
-    if (text.length > 200) score += 1;
-    if (text.includes('.')) score += 1;
-    if (text.split(' ').length > 15) score += 2;
-    if (text.split(' ').length > 30) score += 1;
-    
-    // Check for meaningful content indicators
-    if (/\b(said|according|reported|stated|announced)\b/i.test(text)) score += 2;
-    if (/\b(percent|million|billion|thousand|year|month|day)\b/i.test(text)) score += 1;
-    if (/"[^"]{20,}"/g.test(text)) score += 2; // Contains substantial quotes
-    
-    // Negative scoring criteria
-    if (/\b(cookie|subscribe|advertisement|click here|sign up|newsletter)\b/i.test(text)) {
-      score -= 3;
-    }
-    if (text.length < 20) score -= 2;
-    if (!/[.!?]/.test(text)) score -= 1; // No sentence endings
-    
-    return { element: p, score, text };
-  });
-  
-  // Get top-scoring paragraphs
-  const topParagraphs = scoredParagraphs
-    .filter(p => p.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 30) // Take top 30 paragraphs
-    .map(p => p.text)
-    .filter(text => text.length > 30); // Filter out very short paragraphs
-  
-  return topParagraphs.join('\n\n');
 };

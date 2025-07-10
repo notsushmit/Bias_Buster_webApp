@@ -14,14 +14,15 @@ export interface BiasAnalysis {
   }>;
 }
 
-// Real-time sentiment analysis using actual content
+// Enhanced sentiment analysis using actual content
 export const analyzeSentiment = (text: string): { sentiment: string; confidence: number; score: number } => {
   const positiveWords = [
     'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'positive', 'success', 
     'achievement', 'progress', 'improvement', 'beneficial', 'effective', 'outstanding', 
     'remarkable', 'brilliant', 'superb', 'magnificent', 'exceptional', 'impressive',
     'breakthrough', 'victory', 'triumph', 'prosperity', 'flourishing', 'thriving',
-    'celebrate', 'win', 'accomplish', 'advance', 'boost', 'enhance', 'upgrade'
+    'celebrate', 'win', 'accomplish', 'advance', 'boost', 'enhance', 'upgrade',
+    'approve', 'support', 'endorse', 'praise', 'commend', 'applaud', 'welcome'
   ];
   
   const negativeWords = [
@@ -29,7 +30,8 @@ export const analyzeSentiment = (text: string): { sentiment: string; confidence:
     'crisis', 'disaster', 'problem', 'issue', 'concern', 'disappointing', 'devastating',
     'catastrophic', 'tragic', 'alarming', 'disturbing', 'shocking', 'appalling',
     'scandal', 'corruption', 'fraud', 'violence', 'conflict', 'war', 'death',
-    'decline', 'collapse', 'crash', 'plummet', 'suffer', 'struggle', 'threat'
+    'decline', 'collapse', 'crash', 'plummet', 'suffer', 'struggle', 'threat',
+    'condemn', 'criticize', 'oppose', 'reject', 'deny', 'refuse', 'attack'
   ];
 
   const intensifiers = ['very', 'extremely', 'incredibly', 'absolutely', 'completely', 'totally', 'utterly', 'highly', 'deeply'];
@@ -81,19 +83,19 @@ export const analyzeSentiment = (text: string): { sentiment: string; confidence:
   return { sentiment, confidence, score };
 };
 
-// Dynamic emotional language detection based on actual content
+// Real emotional language detection based on actual content
 export const analyzeEmotionalLanguage = (text: string): number => {
   const emotionalWords = {
     extreme: ['outrageous', 'shocking', 'devastating', 'catastrophic', 'unprecedented', 'explosive', 
               'bombshell', 'scandalous', 'horrific', 'terrifying', 'incredible', 'unbelievable',
               'mind-blowing', 'earth-shattering', 'jaw-dropping', 'breathtaking', 'sensational',
-              'dramatic', 'stunning', 'astounding', 'phenomenal', 'extraordinary'],
+              'dramatic', 'stunning', 'astounding', 'phenomenal', 'extraordinary', 'miraculous'],
     high: ['concerning', 'troubling', 'worrying', 'surprising', 'remarkable', 'notable',
            'significant', 'important', 'serious', 'major', 'critical', 'urgent', 'alarming',
-           'disturbing', 'amazing', 'fantastic', 'wonderful', 'terrible', 'awful'],
+           'disturbing', 'amazing', 'fantastic', 'wonderful', 'terrible', 'awful', 'brilliant'],
     medium: ['interesting', 'notable', 'relevant', 'related', 'connected', 'associated',
-             'considerable', 'substantial', 'meaningful', 'noteworthy'],
-    low: ['some', 'certain', 'particular', 'specific', 'general', 'basic', 'simple']
+             'considerable', 'substantial', 'meaningful', 'noteworthy', 'impressive', 'concerning'],
+    low: ['some', 'certain', 'particular', 'specific', 'general', 'basic', 'simple', 'minor']
   };
 
   // Detect formatting patterns that indicate emotional language
@@ -141,7 +143,7 @@ export const analyzeEmotionalLanguage = (text: string): number => {
   return Math.round(normalizedScore * 10) / 10;
 };
 
-// Dynamic bias detection with real keyword analysis
+// Real bias detection with actual keyword analysis
 export const detectBiasKeywords = (text: string): Array<{ text: string; type: string; explanation: string; startIndex: number; endIndex: number }> => {
   const biasPatterns = {
     emotional: [
@@ -153,12 +155,14 @@ export const detectBiasKeywords = (text: string): Array<{ text: string; type: st
     leftBias: [
       { pattern: /\b(progressive|social justice|climate crisis|systemic racism|wealth inequality)\b/gi, explanation: 'Language commonly associated with left-leaning perspectives' },
       { pattern: /\b(corporate greed|tax the rich|medicare for all|green new deal|reproductive rights)\b/gi, explanation: 'Terminology often used in progressive political discourse' },
-      { pattern: /\b(fascist|authoritarian|far-right|extremist|white supremacist)\b/gi, explanation: 'Strong negative characterizations often used by left-leaning sources' }
+      { pattern: /\b(fascist|authoritarian|far-right|extremist|white supremacist)\b/gi, explanation: 'Strong negative characterizations often used by left-leaning sources' },
+      { pattern: /\b(universal healthcare|living wage|workers rights|union organizing|collective bargaining)\b/gi, explanation: 'Progressive policy terminology' }
     ],
     rightBias: [
       { pattern: /\b(traditional values|law and order|border security|fiscal responsibility|free market)\b/gi, explanation: 'Language commonly associated with right-leaning perspectives' },
       { pattern: /\b(socialist|communist|radical left|liberal elite|mainstream media)\b/gi, explanation: 'Terminology often used in conservative political discourse' },
-      { pattern: /\b(deep state|fake news|cancel culture|woke agenda|virtue signaling)\b/gi, explanation: 'Phrases commonly used to dismiss opposing viewpoints' }
+      { pattern: /\b(deep state|fake news|cancel culture|woke agenda|virtue signaling)\b/gi, explanation: 'Phrases commonly used to dismiss opposing viewpoints' },
+      { pattern: /\b(second amendment|pro-life|family values|religious freedom|states rights)\b/gi, explanation: 'Conservative policy terminology' }
     ],
     factual: [
       { pattern: /\b(according to|sources say|data shows|study finds|research indicates)\b/gi, explanation: 'Proper source attribution - sign of factual reporting' },
@@ -190,14 +194,15 @@ export const detectBiasKeywords = (text: string): Array<{ text: string; type: st
   return highlights;
 };
 
-// Dynamic political bias detection based on content analysis
+// Real political bias detection based on content analysis
 export const detectPoliticalBias = (content: string, sourceName: string): number => {
   const leftKeywords = [
     'progressive', 'social justice', 'climate change', 'climate crisis', 'inequality', 'diversity', 'inclusion', 
     'environmental', 'renewable', 'sustainable', 'universal healthcare', 'minimum wage', 'living wage',
     'gun control', 'reproductive rights', 'immigration reform', 'wealth tax', 'medicare for all',
     'green new deal', 'systemic racism', 'police reform', 'lgbtq rights', 'affordable housing',
-    'workers rights', 'union', 'collective bargaining', 'public option', 'student debt relief'
+    'workers rights', 'union', 'collective bargaining', 'public option', 'student debt relief',
+    'corporate accountability', 'tax the wealthy', 'social programs', 'public education funding'
   ];
   
   const rightKeywords = [
@@ -205,17 +210,20 @@ export const detectPoliticalBias = (content: string, sourceName: string): number
     'fiscal responsibility', 'deregulation', 'second amendment', 'pro-life', 'family values',
     'small government', 'tax cuts', 'military strength', 'national security', 'religious freedom',
     'school choice', 'constitutional rights', 'individual liberty', 'free enterprise', 'patriotism',
-    'states rights', 'personal responsibility', 'limited government', 'free speech', 'capitalism'
+    'states rights', 'personal responsibility', 'limited government', 'free speech', 'capitalism',
+    'business friendly', 'job creators', 'economic growth', 'defense spending'
   ];
 
   const leftNegativeFraming = [
     'corporate greed', 'tax breaks for the wealthy', 'climate denial', 'voter suppression',
-    'authoritarian', 'fascist', 'far-right', 'extremist', 'white supremacist'
+    'authoritarian', 'fascist', 'far-right', 'extremist', 'white supremacist', 'racist',
+    'bigoted', 'discriminatory', 'oppressive', 'regressive'
   ];
 
   const rightNegativeFraming = [
     'socialist', 'communist', 'radical left', 'liberal elite', 'mainstream media',
-    'deep state', 'fake news', 'cancel culture', 'woke agenda', 'virtue signaling'
+    'deep state', 'fake news', 'cancel culture', 'woke agenda', 'virtue signaling',
+    'anti-american', 'unpatriotic', 'godless', 'immoral'
   ];
   
   const contentLower = content.toLowerCase();
@@ -260,15 +268,15 @@ export const detectPoliticalBias = (content: string, sourceName: string): number
   // Calculate content bias (-5 to +5 scale)
   const contentBias = ((rightScore - leftScore) / totalKeywords) * 5;
   
-  // Combine source bias (40%) with content bias (60%)
-  const finalBias = (sourceBias * 0.4) + (contentBias * 0.6);
+  // Combine source bias (30%) with content bias (70%) for more content-driven analysis
+  const finalBias = (sourceBias * 0.3) + (contentBias * 0.7);
   
   return Math.max(-5, Math.min(5, finalBias));
 };
 
-// Dynamic factuality calculation based on content quality
+// Real factuality calculation based on content quality indicators
 export const calculateFactuality = (sourceName: string, content: string): number => {
-  // Base factuality on source reputation
+  // Base factuality on source reputation (known reliable sources)
   const sourceFactuality: Record<string, number> = {
     'reuters': 9.2, 'associated press': 9.1, 'bbc': 8.8, 'npr': 8.9,
     'wall street journal': 8.7, 'new york times': 8.1, 'washington post': 8.2,
@@ -292,15 +300,16 @@ export const calculateFactuality = (sourceName: string, content: string): number
   const contentLength = content.length;
   let qualityScore = 0;
 
-  // Positive indicators
+  // Positive indicators (signs of good journalism)
   const sourceCitations = content.match(/according to|sources say|reported by|officials said|spokesperson|statement from|data shows|study finds|research indicates/gi) || [];
   const directQuotes = content.match(/"[^"]{20,}"/g) || [];
   const statistics = content.match(/\d+(\.\d+)?%|\d+\s*(million|billion|thousand|percent)/g) || [];
   const dateReferences = content.match(/yesterday|today|this week|last month|january|february|march|april|may|june|july|august|september|october|november|december|\d{4}|\d{1,2}\/\d{1,2}\/\d{2,4}/gi) || [];
   const expertSources = content.match(/professor|doctor|researcher|analyst|expert|specialist|director|chief|president|ceo/gi) || [];
   const factualLanguage = content.match(/data|evidence|research|study|analysis|investigation|report|survey|poll/gi) || [];
+  const verificationLanguage = content.match(/confirmed|verified|documented|established|proven|fact-checked/gi) || [];
 
-  // Calculate quality indicators (per 1000 characters)
+  // Calculate quality indicators (per 1000 characters for normalization)
   const density = 1000 / Math.max(contentLength, 1000);
   qualityScore += Math.min(sourceCitations.length * density * 0.5, 1.5);
   qualityScore += Math.min(directQuotes.length * density * 0.3, 1.0);
@@ -308,23 +317,26 @@ export const calculateFactuality = (sourceName: string, content: string): number
   qualityScore += Math.min(dateReferences.length * density * 0.2, 0.5);
   qualityScore += Math.min(expertSources.length * density * 0.3, 0.8);
   qualityScore += Math.min(factualLanguage.length * density * 0.2, 0.5);
+  qualityScore += Math.min(verificationLanguage.length * density * 0.4, 0.8);
 
-  // Negative indicators
+  // Negative indicators (signs of poor journalism)
   const opinionLanguage = content.match(/i think|i believe|in my opinion|it seems|arguably|presumably|supposedly|clearly|obviously/gi) || [];
   const sensationalLanguage = content.match(/shocking|outrageous|unbelievable|incredible|devastating|explosive|bombshell/gi) || [];
-  const unsourcedClaims = content.match(/many people say|it is said|rumors suggest|sources claim|allegedly/gi) || [];
+  const unsourcedClaims = content.match(/many people say|it is said|rumors suggest|sources claim|allegedly without attribution/gi) || [];
+  const clickbaitLanguage = content.match(/you won't believe|this will shock you|amazing|incredible|must see/gi) || [];
 
   const opinionPenalty = Math.min(opinionLanguage.length * density * 0.3, 1.0);
   const sensationalPenalty = Math.min(sensationalLanguage.length * density * 0.4, 1.5);
-  const unsourcedPenalty = Math.min(unsourcedClaims.length * density * 0.2, 0.8);
+  const unsourcedPenalty = Math.min(unsourcedClaims.length * density * 0.5, 1.2);
+  const clickbaitPenalty = Math.min(clickbaitLanguage.length * density * 0.3, 0.8);
 
   // Calculate final score
-  const finalScore = baseScore + qualityScore - opinionPenalty - sensationalPenalty - unsourcedPenalty;
+  const finalScore = baseScore + qualityScore - opinionPenalty - sensationalPenalty - unsourcedPenalty - clickbaitPenalty;
   
   return Math.max(1, Math.min(10, Math.round(finalScore * 10) / 10));
 };
 
-// Helper function for source political bias
+// Helper function for source political bias (based on media bias research)
 const getSourcePoliticalBias = (sourceName: string): number => {
   const biasMap: Record<string, number> = {
     // Left-leaning sources
@@ -353,20 +365,24 @@ const getSourcePoliticalBias = (sourceName: string): number => {
   return 0; // Default to center if unknown
 };
 
-// Main analysis function with real dynamic results
+// Main analysis function with real-time content analysis
 export const analyzeArticleBias = async (content: string, sourceName: string): Promise<BiasAnalysis> => {
   try {
-    console.log('Starting dynamic bias analysis for:', sourceName);
+    console.log('Starting real-time bias analysis for:', sourceName);
     console.log('Content length:', content.length);
     
-    // Run real-time analyses
+    if (!content || content.length < 100) {
+      throw new Error('Insufficient content for analysis');
+    }
+    
+    // Run real-time analyses on actual content
     const sentimentResult = analyzeSentiment(content);
     const emotionalScore = analyzeEmotionalLanguage(content);
     const highlights = detectBiasKeywords(content);
     const politicalBias = detectPoliticalBias(content, sourceName);
     const factuality = calculateFactuality(sourceName, content);
 
-    console.log('Dynamic analysis results:', {
+    console.log('Real-time analysis results:', {
       politicalBias: Math.round(politicalBias * 10) / 10,
       emotionalScore: Math.round(emotionalScore * 10) / 10,
       factuality,
@@ -387,13 +403,6 @@ export const analyzeArticleBias = async (content: string, sourceName: string): P
     };
   } catch (error) {
     console.error('Error analyzing article bias:', error);
-    // Return neutral values instead of static ones
-    return {
-      politicalBias: 0,
-      emotionalLanguage: 0,
-      factuality: 6.0,
-      sentiment: 'neutral',
-      highlights: []
-    };
+    throw error;
   }
 };
