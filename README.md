@@ -114,7 +114,7 @@ Advanced text-to-speech controls with multiple voice options*
 
 ### Prerequisites
 - Node.js 16+ and npm
-- Modern web browser with ES2020 support
+- Modern web browser with ES2020 support.
 
 ### Installation
 
@@ -276,7 +276,7 @@ npm run preview
 - [ ] **Browser Extension**: Analyze articles directly from any website
 - [ ] **API Endpoints**: Public API for bias analysis integration
 - [ ] **Machine Learning**: Enhanced bias detection with custom ML models
-- [ ] **Social Features**: Share analyses and compare reading habits with friends
+- [ ] **Social Features**: Share analyses and compare reading habits with friends.
 
 
 ---
